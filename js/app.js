@@ -9,7 +9,7 @@ const plain = s => String(s).replace(/\*\*|`/g, '');
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
 // ---------- state ----------
-let ST = { xp: 0, done: {}, quiz: {}, best: 0, theme: '', rate: 1, voice: '', topics: {}, plan: null, planCfg: null };
+let ST = { xp: 0, done: {}, quiz: {}, best: 0, theme: '', rate: 1, voice: '', topics: {}, plan: null, planCfg: null, pdone: {}, pans: {} };
 try { Object.assign(ST, JSON.parse(localStorage.getItem('hsc_state') || '{}')); } catch (e) {}
 const save = () => { try { localStorage.setItem('hsc_state', JSON.stringify(ST)); } catch (e) {} };
 function addXP(n) { ST.xp += n; save(); updateXP(); }
@@ -93,16 +93,16 @@ function speakable(node, text) { node.dataset.speak = plain(text); return node; 
 
 // ---------- illustrations (inline SVG) ----------
 const SVG = {
-  layers: () => `<svg viewBox="0 0 520 300" role="img" aria-label="AI contains machine learning which contains generative AI">
-    <circle cx="190" cy="150" r="130" fill="#ffe0c9" stroke="#2b2a33" stroke-width="3"/>
-    <circle cx="190" cy="185" r="88" fill="#bff0ea" stroke="#2b2a33" stroke-width="3"/>
-    <circle class="pulse" cx="190" cy="210" r="46" fill="#ffd84d" stroke="#2b2a33" stroke-width="3"/>
-    <text x="190" y="62" text-anchor="middle" font-family="Patrick Hand" font-size="22" fill="#2b2a33">AI</text>
-    <text x="190" y="130" text-anchor="middle" font-family="Patrick Hand" font-size="19" fill="#2b2a33">Machine Learning</text>
-    <text x="190" y="205" text-anchor="middle" font-family="Patrick Hand" font-size="15" fill="#2b2a33">Generative</text>
-    <text x="190" y="223" text-anchor="middle" font-family="Patrick Hand" font-size="15" fill="#2b2a33">AI (Claude!)</text>
-    <g font-family="Nunito" font-size="15" fill="#2b2a33"><text x="350" y="80">AI: any smart-acting software</text><text x="350" y="150">ML: learns from examples</text><text x="350" y="220">GenAI: creates new text,</text><text x="350" y="240">images, code</text></g>
-    <path class="flowline" d="M335 76 L290 76 M335 146 L270 146 M335 216 L240 216" stroke="#ff7a3d" stroke-width="3" fill="none"/></svg>`,
+  layers: () => `<svg viewBox="0 0 560 300" role="img" aria-label="AI contains machine learning which contains generative AI">
+    <circle cx="150" cy="150" r="130" fill="#ffe0c9" stroke="#2b2a33" stroke-width="3"/>
+    <circle cx="150" cy="185" r="88" fill="#bff0ea" stroke="#2b2a33" stroke-width="3"/>
+    <circle class="pulse" cx="150" cy="210" r="46" fill="#ffd84d" stroke="#2b2a33" stroke-width="3"/>
+    <text x="150" y="62" text-anchor="middle" font-family="Patrick Hand" font-size="24" fill="#2b2a33">AI</text>
+    <text x="150" y="130" text-anchor="middle" font-family="Patrick Hand" font-size="19" fill="#2b2a33">Machine Learning</text>
+    <text x="150" y="205" text-anchor="middle" font-family="Patrick Hand" font-size="15" fill="#2b2a33">Generative</text>
+    <text x="150" y="223" text-anchor="middle" font-family="Patrick Hand" font-size="15" fill="#2b2a33">AI (Claude!)</text>
+    <g font-family="Nunito" font-size="17" font-weight="700" fill="#2b2a33"><text x="300" y="70">AI: smart-acting software</text><text x="300" y="140">ML: learns from examples</text><text x="300" y="212">GenAI: creates new text,</text><text x="300" y="234">images and code</text></g>
+    <path class="flowline" d="M292 66 L240 66 M292 136 L225 136 M292 208 L198 208" stroke="#ff7a3d" stroke-width="3" fill="none"/></svg>`,
   network: () => `<svg viewBox="0 0 520 260" role="img" aria-label="A simple neural network">
     ${[0, 1, 2].map(i => [0, 1, 2, 3].map(j => `<line class="flowline" x1="90" y1="${50 + i * 80}" x2="260" y2="${35 + j * 62}" stroke="#3b6cf6" stroke-width="1.5" opacity=".5"/>`).join('')).join('')}
     ${[0, 1, 2, 3].map(j => [0, 1].map(k => `<line class="flowline" x1="260" y1="${35 + j * 62}" x2="430" y2="${90 + k * 80}" stroke="#ff5d8f" stroke-width="1.5" opacity=".5"/>`).join('')).join('')}
@@ -384,7 +384,7 @@ function viewHome() {
   const d = el('div', '', `
   <section class="hero"><div><h1>Learn Claude <span>from zero to certified</span></h1>
     <p>Never touched AI before? Perfect. This book-style site uses stories, pictures, little games and <b>lots of quizzes</b>. Every paragraph has a 🔊 button, so you can <b>listen</b> as well as read.</p>
-    <div class="cta-row"><a class="btn" href="#/track/beginner">🌱 Start as a beginner</a><a class="btn alt" href="#/track/cert">🎓 Certification prep</a><a class="btn ghost" href="#/certs">🏅 Exam plans</a><a class="btn ghost" href="#/exam">📝 Practice exam</a></div></div>
+    <div class="cta-row"><a class="btn" href="#/track/beginner">🌱 Start as a beginner</a><a class="btn alt" href="#/track/cert">🎓 Certification prep</a><a class="btn ghost" href="#/practice">🏋️ Practice</a><a class="btn ghost" href="#/certs">🏅 Exam plans</a><a class="btn ghost" href="#/exam">📝 Practice exam</a></div></div>
     <div class="hero-art">${MASCOT}</div></section>
   <section class="grid2">
     <div class="card"><h3>🌱 Beginner: Start Here</h3><p>${C.beginner.length} friendly lessons. What AI is, how Claude works, how to talk to it, and how to stay safe.</p><div class="bar"><i style="width:${b.done / b.total * 100}%"></i></div><small>${b.done}/${b.total} lessons done</small><p><a class="btn small" href="#/track/beginner">Open</a></p></div>
@@ -544,7 +544,7 @@ function viewCert(id) {
     det.innerHTML = `<summary style="list-style:none;cursor:pointer"><h3 style="display:inline">${x.emoji} Domain ${x.n}: ${esc(x.name)}</h3> <span class="tok" style="background:#ffd84d">${x.weight}%</span> <small class="dp">${doneN}/${x.topics.length} topics</small></summary>
       <p>${esc(x.focus)}</p><div class="bar"><i style="width:${doneN / x.topics.length * 100}%"></i></div>
       <div class="tlist">${x.topics.map((t, i) => `<label class="topic"><input type="checkbox" data-k="${cert.id}:${x.id}:${i}" ${ST.topics[cert.id + ':' + x.id + ':' + i] ? 'checked' : ''}> <span>${esc(t)}</span></label>`).join('')}</div>
-      <p><b>Lessons for this section:</b></p><div class="row">${lessonChips(x.lessons)}</div><div class="row"><a class="btn small" href="#/exam/${x.id}">📝 Practise this domain</a></div>`;
+      <p><b>Lessons for this section:</b></p><div class="row">${lessonChips(x.lessons)}</div><div class="row"><a class="btn small" href="#/exam/${x.id}">📝 Quiz this domain</a>${C.practice.filter(p => p.domain === x.id).map(p => `<a class="btn small alt" href="#/practice/${p.id}">🏋️ ${esc(p.title)}</a>`).join('')}</div>`;
     det.addEventListener('change', e => {
       const cb = e.target.closest('input[type=checkbox]'); if (!cb) return;
       ST.topics[cb.dataset.k] = cb.checked || undefined; if (!cb.checked) delete ST.topics[cb.dataset.k]; save();
@@ -611,6 +611,78 @@ function planUI(cert, box) {
   draw();
 }
 
+// ---------- practice section ----------
+const TYPE_LABEL = { prompt: ['✍️', 'WRITE A PROMPT'], code: ['💻', 'CODE IT'], design: ['📐', 'DESIGN IT'], debug: ['🐞', 'FIND THE BUG'], quick: ['⚡', 'QUICK ANSWER'] };
+const stars = n => '⭐'.repeat(n) + '<span style="opacity:.25">' + '⭐'.repeat(3 - n) + '</span>';
+function setProgress(s) { return { done: s.exercises.filter(e => (ST.pdone || {})[e.id]).length, total: s.exercises.length }; }
+
+function viewPractice() {
+  nav('practice'); const all = C.practice;
+  const tot = all.reduce((a, s) => a + s.exercises.length, 0), dn = all.reduce((a, s) => a + setProgress(s).done, 0);
+  const d = el('div', '', `<h1>🏋️ Practice</h1><p>Reading is not enough. <b>Try each exercise first</b>, use the hints if you are stuck, then open the model solution and tick the self-check list. ${dn}/${tot} exercises done.</p>
+    <div class="note-box">How it works: 1) read the task 2) write your answer in the box (it is saved on this device) 3) reveal the solution and compare 4) tick what you got right.</div>`);
+  [['beginner', '🌱 Beginner practice'], ['cert', '🎓 Certification practice (matches the exam domains)']].forEach(([t, title]) => {
+    d.append(el('h2', '', title)); const g = el('div', 'grid2');
+    all.filter(s => s.track === t).forEach(s => {
+      const p = setProgress(s), dm = s.domain ? C.certs[0].domains.find(x => x.id === s.domain) : null;
+      const a = el('a', 'card pcard', `<h3>${s.emoji} ${esc(s.title)}</h3><p>${esc(s.sub)}</p>${dm ? `<p><span class="tok" style="background:#ffd84d">Domain ${dm.n} · ${dm.weight}%</span></p>` : ''}<div class="bar"><i style="width:${p.done / p.total * 100}%"></i></div><small>${p.done}/${p.total} exercises done</small>`);
+      a.href = '#/practice/' + s.id; g.append(a);
+    });
+    d.append(g);
+  });
+  mount(d);
+}
+
+function renderEx(ex, set) {
+  ST.pdone = ST.pdone || {}; ST.pans = ST.pans || {};
+  const [ic, lab] = TYPE_LABEL[ex.type] || TYPE_LABEL.prompt;
+  const d = el('div', 'box excard' + (ST.pdone[ex.id] ? ' isdone' : ''));
+  d.innerHTML = `<span class="tag">${ic} ${lab} · ${stars(ex.level)}</span><h3>${esc(ex.title)} <span class="dn">${ST.pdone[ex.id] ? '✅' : ''}</span></h3>
+    <div class="task">${fmt(ex.task)}</div>${ex.starter ? '<pre class="starter"></pre>' : ''}
+    <div class="row"><button class="btn small ghost hbtn">💡 Hint</button></div><div class="hints"></div>
+    <textarea class="txt myans" rows="${ex.type === 'quick' ? 2 : 5}" placeholder="${ex.type === 'quick' ? 'Type your answer...' : 'Write your answer here. It is saved on this device.'}" aria-label="Your answer"></textarea>
+    ${ex.ans ? '<div class="row"><button class="btn small chk">Check my answer</button></div><div class="qfb"></div>' : ''}
+    <div class="row"><button class="btn small alt rbtn">🔓 Reveal solution (try first!)</button><button class="btn small ghost mbtn">${ST.pdone[ex.id] ? '↩ Mark not done' : '✔ Mark done'}</button></div>
+    <div class="sol" hidden><h4>✅ Model solution</h4><div class="solbody"></div><h4>💡 Why this works</h4><p class="exp"></p><h4>🧾 Self-check: did your answer include...</h4><div class="sc"></div></div>`;
+  if (ex.starter) $('.starter', d).textContent = ex.starter;
+  const ta = $('.myans', d); ta.value = ST.pans[ex.id] || '';
+  let to; ta.oninput = () => { clearTimeout(to); to = setTimeout(() => { ST.pans[ex.id] = ta.value.slice(0, 4000); save(); }, 400); };
+  // hints, revealed one at a time
+  let hn = 0; const hb = $('.hbtn', d), hints = $('.hints', d);
+  if (!(ex.hints || []).length) hb.hidden = true;
+  hb.onclick = () => { if (hn < ex.hints.length) { hints.append(el('div', 'why', '💡 ' + fmt(ex.hints[hn]))); hn++; hb.textContent = hn < ex.hints.length ? `💡 Another hint (${hn}/${ex.hints.length})` : '💡 No more hints'; if (hn >= ex.hints.length) hb.disabled = true; } };
+  // optional quick check
+  if (ex.ans) {
+    $('.chk', d).onclick = () => { const v = ta.value.trim().toLowerCase().replace(/\s+/g, ' '); const ok = ex.ans.some(a => v.includes(a.toLowerCase())); const q = $('.qfb', d); q.className = 'qfb fb ' + (ok ? 'ok' : 'bad'); q.textContent = ok ? '🎉 That matches the expected answer! Open the solution to see the working.' : '🤔 Not matching yet. Try a hint, or reveal the solution.'; if (ok) confetti(25); };
+  }
+  // solution
+  const sol = $('.sol', d), body = $('.solbody', d);
+  if (ex.code) { const pre = el('pre'); pre.textContent = ex.sol; body.append(pre); }
+  else body.innerHTML = fmt(ex.sol).replace(/\n/g, '<br>');
+  $('.exp', d).innerHTML = fmt(ex.explain || '');
+  const sc = $('.sc', d);
+  (ex.check || []).forEach((c, i) => { const l = el('label', 'topic', `<input type="checkbox"> <span>${fmt(c)}</span>`); sc.append(l); });
+  const finish = (val) => { ST.pdone[ex.id] = val || undefined; if (!val) delete ST.pdone[ex.id]; save(); d.classList.toggle('isdone', !!val); $('.dn', d).textContent = val ? '✅' : ''; $('.mbtn', d).textContent = val ? '↩ Mark not done' : '✔ Mark done'; const hd = $('#setProg'); if (hd) updSet(set); };
+  const award = () => { if (!ST.pdone[ex.id]) { addXP(15); confetti(60); } finish(true); };
+  sc.addEventListener('change', () => { const boxes = [...sc.querySelectorAll('input')]; if (boxes.length && boxes.every(b => b.checked)) award(); });
+  $('.mbtn', d).onclick = () => { if (ST.pdone[ex.id]) finish(false); else award(); };
+  $('.rbtn', d).onclick = e => { sol.hidden = false; e.target.disabled = true; e.target.textContent = '🔓 Solution shown'; d.dataset.speak = plain(ex.title + '. ' + ex.task + ' Model solution. ' + (ex.code ? 'See the code on screen. ' : ex.sol) + ' Why this works. ' + (ex.explain || '')); };
+  d.dataset.speak = plain(ex.title + '. ' + ex.task);
+  return d;
+}
+function updSet(set) { const p = setProgress(set); const pb = $('#setProg'); if (pb) { pb.firstChild.style.width = (p.done / p.total * 100) + '%'; $('#setProgTxt').textContent = `${p.done}/${p.total} exercises done`; } }
+
+function viewPSet(id) {
+  const set = C.practice.find(s => s.id === id); if (!set) return viewPractice();
+  nav('practice');
+  const root = el('div', ''); root.id = 'lesson';
+  root.append(el('div', 'lesson-head', `<div class="crumbs"><a href="#/practice">Practice</a> › ${esc(set.title)}</div><div class="big">${set.emoji}</div><h1>${esc(set.title)}</h1><div class="crumbs">${esc(set.sub)}</div><div class="bar" id="setProg"><i></i></div><small id="setProgTxt"></small>`));
+  set.exercises.forEach(ex => { const w = el('div', 'blk reveal'); const n = renderEx(ex, set); w.append(n); const s = spkBtn(n); s.classList.add('abs'); w.append(s); root.append(w); });
+  const i = C.practice.findIndex(s => s.id === id), next = C.practice[i + 1];
+  root.append(el('div', 'box', `<div class="row" style="justify-content:space-between"><a class="btn ghost small" href="#/practice">⬅ All practice sets</a>${next ? `<a class="btn small" href="#/practice/${next.id}">${esc(next.title)} ➡</a>` : '<a class="btn small" href="#/exam">Take the practice exam ➡</a>'}</div>`));
+  mount(root); updSet(set); bar.hidden = !synth; setBtns();
+}
+
 // ---------- Q&A + glossary ----------
 function viewQA() {
   nav('qa'); const faqs = [];
@@ -630,16 +702,18 @@ function viewQA() {
 
 // ---------- router ----------
 function route() {
-  stopSpeak(); bar.hidden = true;
+  stopSpeak(); bar.hidden = true; document.querySelector('.top').classList.remove('open');
   const [, a, b] = (location.hash || '#/').split('/');
   if (a === 'track' && (b === 'beginner' || b === 'cert')) viewTrack(b);
   else if (a === 'lesson') viewLesson(b);
   else if (a === 'exam') viewExam(b);
+  else if (a === 'practice') (b ? viewPSet(b) : viewPractice());
   else if (a === 'certs') viewCerts();
   else if (a === 'cert') viewCert(b);
   else if (a === 'qa') viewQA();
   else viewHome();
 }
+$('#menuBtn').onclick = () => { const t = $('.top'); t.classList.toggle('open'); $('#menuBtn').setAttribute('aria-expanded', t.classList.contains('open')); };
 $('#themeBtn').onclick = () => { ST.theme = ST.theme === 'dark' ? '' : 'dark'; save(); applyTheme(); };
 function applyTheme() { if (ST.theme) document.documentElement.dataset.theme = ST.theme; else delete document.documentElement.dataset.theme; }
 applyTheme(); updateXP(); initListenBar();

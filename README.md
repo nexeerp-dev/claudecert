@@ -15,12 +15,15 @@ Use Chrome, Edge or Safari. Read-aloud uses your browser's built-in voices (work
 - Certification lessons: 12 modules (Messages API, structured output, tool use, agents, caching/cost, RAG, MCP, evals/safety, Claude Code, Agent SDK, CI/CD, case studies)
 - Exam Plans (`#/certs`): per-certification syllabus with domain weights, 59 tickable topics, lesson links, domain-only practice, a timed 60-question mock exam, and a day-by-day study-plan builder
 - ~100 lesson quizzes + 10 scenario questions → Practice Exam (10 / 25 / all questions, with review)
+- Practice (`#/practice`): 55 hands-on exercises (write a prompt, code it, design it, find the bug, quick answer), each with progressive hints, a saved answer box, a model solution, an explanation and a self-check list
+- Mobile friendly: hamburger menu, compact listen bar, large tap targets, no horizontal scrolling (tested at 320 to 768 px)
 - Q&A + Glossary page with search
 - Progress and XP are saved in your browser (localStorage)
 
 ## Edit the content
 All lessons are plain JavaScript data:
-- `js/content_beginner.js`, `js/content_cert.js` – add or change lessons
+- `js/content_beginner.js`, `js/content_cert.js` – lessons; `js/deep_*.js` – deep dives; `js/content_practice.js` – practice exercises
+- Add an exercise: `X('id', 'prompt', 2, 'Title', 'Task text', {hints:[...], sol:'...', explain:'...', check:[...]})`
 - `js/content_common.js` – block helpers (S, P, Q, EX, MATCH ...) and the glossary
 - `js/app.js` – the engine; `css/style.css` – the look
 
